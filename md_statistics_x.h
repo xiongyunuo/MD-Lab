@@ -2,6 +2,7 @@
 #define MD_STATISTICS_X_H
 
 #include "md_particle_x.h"
+#include "md_simulation_x.h"
 
 #define MD_MAX_STATS_COUNT 10000
 
@@ -15,7 +16,20 @@ typedef struct {
   int points;
   md_num_t_x *fx;
   md_num_t_x **fxs;
+#ifdef MD_USE_OPENCL_X
+  cl_mem e_mem;
+  cl_mem T_mem;
+  cl_mem fx_mem;
+  cl_context context;
+  cl_command_queue queue;
+#endif
 } md_stats_t_x;
+
+#ifdef MD_USE_OPENCL_X
+cl_int md_stats_to_context_x(md_stats_t_x *stats, cl_context context);
+#endif
+
+md_stats_t_x *md_stats_sync_host_x(md_stats_t_x *stats);
 
 typedef md_num_t_x (*md_pair_energy_t_x)(md_num_t_x *p1, md_num_t_x *p2, md_num_t_x *L, md_num_t_x m);
 typedef md_num_t_x (*md_trap_energy_t_x)(md_num_t_x *p1, md_num_t_x *L, md_num_t_x m);
@@ -26,14 +40,23 @@ void md_finalize_stats_x(md_stats_t_x *stats);
 md_num_t_x md_LJ_periodic_energy_x(md_num_t_x *p1, md_num_t_x *p2, md_num_t_x *L, md_num_t_x m);
 md_num_t_x md_harmonic_trap_energy_x(md_num_t_x *p1, md_num_t_x *L, md_num_t_x m);
 md_num_t_x md_gaussian_energy_x(md_num_t_x *p1, md_num_t_x *p2, md_num_t_x *L, md_num_t_x m);
+md_num_t_x md_periodic_gaussian_energy_x(md_num_t_x *p1, md_num_t_x *p2, md_num_t_x *L, md_num_t_x m);
 md_num_t_x md_coulomb_energy_x(md_num_t_x *p1, md_num_t_x *p2, md_num_t_x *L, md_num_t_x m);
 md_num_t_x md_coulomb_periodic_energy_x(md_num_t_x *p1, md_num_t_x *p2, md_num_t_x *L, md_num_t_x m);
 md_num_t_x md_coulomb_3d_ewald_energy_x(md_num_t_x *p1, md_num_t_x *p2, md_num_t_x *L, md_num_t_x m);
+md_num_t_x md_hubbard_trap_energy_x(md_num_t_x *p1, md_num_t_x *L, md_num_t_x m);
+md_num_t_x md_periodic_helium_energy_x(md_num_t_x *p1, md_num_t_x *p2, md_num_t_x *L, md_num_t_x m);
+
 void md_calc_pair_energy_x(md_simulation_t_x *sim, md_pair_energy_t_x pe, md_stats_t_x *stats);
 void md_calc_temperature_x(md_simulation_t_x *sim, md_stats_t_x *stats);
 void md_calc_pair_correlation_x(md_simulation_t_x *sim, md_stats_t_x *stats, md_num_t_x rmax, int image);
 void md_normalize_distribution_x(int N, md_num_t_x *dis, md_num_t_x rmax, md_num_t_x norm);
 void md_normalize_2d_distribution_x(int N, md_num_t_x *dis, md_num_t_x rmin, md_num_t_x rmax);
 md_num_t_x md_2d_fourier_transform_x(int N, md_num_t_x *dis, md_num_t_x rmin, md_num_t_x rmax, md_num_t_x q);
+
+#ifdef MD_USE_OPENCL_X
+void md_get_pair_energy_info_x(md_pair_energy_t_x pe, const char *prefix, const char *postfix, char *dest, md_inter_params_t_x *params);
+void md_get_trap_energy_info_x(md_trap_energy_t_x te, const char *prefix, const char *postfix, char *dest, md_inter_params_t_x *params);
+#endif
 
 #endif

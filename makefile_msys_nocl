@@ -1,0 +1,26 @@
+CC = gcc
+OPENCL_FLAGS = 
+FLAGS = -Wall -Wundef -Wunused-parameter -Wno-deprecated-declarations -fno-common -fPIC -O2 $(OPENCL_FLAGS)
+OBJECTS = md_util_x.o md_simulation_x.o md_statistics_x.o md_pimd_x.o
+
+libxmd_x.dll : $(OBJECTS) xmd_config
+	$(CC) -shared $(OBJECTS) -o libxmd_x.dll -lpthread
+
+xmd_config : xmd_config.c
+	$(CC) xmd_config.c -o xmd_config -O2 $(OPENCL_FLAGS)
+
+md_util_x.o : md_util_x.c md_util_x.h md_particle_x.h
+	$(CC) -c md_util_x.c -o md_util_x.o $(FLAGS)
+
+md_simulation_x.o : md_simulation_x.c md_simulation_x.h md_particle_x.h
+	$(CC) -c md_simulation_x.c -o md_simulation_x.o $(FLAGS)
+
+md_statistics_x.o : md_statistics_x.c md_statistics_x.h md_particle_x.h md_simulation_x.h
+	$(CC) -c md_statistics_x.c -o md_statistics_x.o $(FLAGS)
+
+md_pimd_x.o : md_pimd_x.c md_pimd_x.h md_particle_x.h md_util_x.h md_simulation_x.h md_statistics_x.h
+	$(CC) -c md_pimd_x.c -o md_pimd_x.o $(FLAGS)
+
+.PHONY : clean
+clean :
+	rm libxmd_x.dll $(OBJECTS) xmd_config
