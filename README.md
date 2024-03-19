@@ -1,5 +1,5 @@
 # MD-Lab
-Implements PIMD simulation of fictitious identical particles based on the quadratic scaling MD algorithm (https://arxiv.org/abs/2305.18025). No third party libraries apart from OpenCL is used, a working POSIX environment is required for compilation.
+Implements PIMD simulation of fictitious identical particles based on the quadratic scaling MD algorithm (https://arxiv.org/abs/2305.18025). No third party libraries apart from OpenCL are used, a working POSIX environment is required for compilation.
 
 OpenCL for parallelized PIMD simulation is now supported. To use OpenCL, compile the project with makefiles that end with "_cl" suffix ("_nocl" suffix is for single thread no OpenCL compilation, "_pocl" is for POCL implementation of OpenCL), the system default implementation of OpenCL will be used.
 
