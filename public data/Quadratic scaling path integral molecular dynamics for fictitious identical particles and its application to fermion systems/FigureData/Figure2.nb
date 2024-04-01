@@ -1,0 +1,142 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 12.3' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       158,          7]
+NotebookDataLength[      4197,        134]
+NotebookOptionsPosition[      3706,        116]
+NotebookOutlinePosition[      4115,        133]
+CellTagsIndexPosition[      4072,        130]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"speedup", "=", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"100", ",", "95"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"200", ",", "193"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"300", ",", "290"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"400", ",", "385"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"500", ",", "490"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"600", ",", "580"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"700", ",", "680"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"800", ",", "790"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"900", ",", "890"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"1000", ",", "970"}], "}"}]}], "}"}]}], 
+  ";"}], "\[IndentingNewLine]", 
+ RowBox[{"ListPlot", "[", 
+  RowBox[{"speedup", ",", 
+   RowBox[{"Frame", "->", "True"}], ",", 
+   RowBox[{"FrameLabel", "\[Rule]", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"HoldForm", "[", "\"\<speedup\>\"", "]"}], ",", "None"}], 
+       "}"}], ",", 
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"HoldForm", "[", "N", "]"}], ",", "None"}], "}"}]}], "}"}]}], 
+   ",", 
+   RowBox[{"PlotRange", "->", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{"80", ",", "1010"}], "}"}], ",", 
+      RowBox[{"{", 
+       RowBox[{"80", ",", "1010"}], "}"}]}], "}"}]}]}], "]"}]}], "Input",
+ CellChangeTimes->{{3.919658576146119*^9, 3.919658801832426*^9}},
+ CellLabel->
+  "In[4361]:=",ExpressionUUID->"478a67f1-574f-4a52-8d43-719cdf5f0845"],
+
+Cell[BoxData[
+ GraphicsBox[{{}, 
+   {RGBColor[0.368417, 0.506779, 0.709798], PointSize[0.012833333333333334`], 
+    AbsoluteThickness[1.6], 
+    PointBox[{{100., 95.}, {200., 193.}, {300., 290.}, {400., 385.}, {500., 
+     490.}, {600., 580.}, {700., 680.}, {800., 790.}, {900., 890.}, {1000., 
+     970.}}]}, {{}, {}}},
+  AspectRatio->NCache[GoldenRatio^(-1), 0.6180339887498948],
+  Axes->{True, True},
+  AxesLabel->{None, None},
+  AxesOrigin->{80., 80.},
+  DisplayFunction->Identity,
+  Frame->{{True, True}, {True, True}},
+  FrameLabel->{{
+     FormBox[
+      TagBox["\"speedup\"", HoldForm], TraditionalForm], None}, {
+     FormBox[
+      TagBox["N", HoldForm], TraditionalForm], None}},
+  FrameTicks->{{Automatic, Automatic}, {Automatic, Automatic}},
+  GridLines->{None, None},
+  GridLinesStyle->Directive[
+    GrayLevel[0.5, 0.4]],
+  Method->{
+   "OptimizePlotMarkers" -> True, "OptimizePlotMarkers" -> True, 
+    "CoordinatesToolOptions" -> {"DisplayFunction" -> ({
+        Identity[
+         Part[#, 1]], 
+        Identity[
+         Part[#, 2]]}& ), "CopiedValueFunction" -> ({
+        Identity[
+         Part[#, 1]], 
+        Identity[
+         Part[#, 2]]}& )}},
+  PlotRange->{{80, 1010}, {80, 1010}},
+  PlotRangeClipping->True,
+  PlotRangePadding->{{0, 0}, {0, 0}},
+  Ticks->{Automatic, Automatic}]], "Output",
+ CellChangeTimes->{{3.919658636470448*^9, 3.9196587204384613`*^9}, {
+  3.919658751639537*^9, 3.919658802020958*^9}},
+ CellLabel->
+  "Out[4362]=",ExpressionUUID->"fa57bffb-3b64-4e92-85f1-15a436a9c5a1"]
+}, Open  ]]
+},
+WindowSize->{808, 847},
+WindowMargins->{{275, Automatic}, {-51, Automatic}},
+FrontEndVersion->"12.3 for Mac OS X x86 (64-bit) \
+(2021\:5e745\:670811\:65e5)",
+StyleDefinitions->"Default.nb",
+ExpressionUUID->"d124fddc-f63d-4bf0-9cda-2068e12851bd"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[CellGroupData[{
+Cell[580, 22, 1586, 49, 158, "Input",ExpressionUUID->"478a67f1-574f-4a52-8d43-719cdf5f0845"],
+Cell[2169, 73, 1521, 40, 247, "Output",ExpressionUUID->"fa57bffb-3b64-4e92-85f1-15a436a9c5a1"]
+}, Open  ]]
+}
+]
+*)
+

@@ -1,0 +1,178 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 12.3' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       158,          7]
+NotebookDataLength[      5500,        168]
+NotebookOptionsPosition[      5009,        150]
+NotebookOutlinePosition[      5417,        167]
+CellTagsIndexPosition[      5374,        164]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"energyxifermi", "=", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"1.5", ",", "12.8637"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"2", ",", "14.963"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"2.5", ",", "17.26"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"3", ",", "19.312"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"3.5", ",", "21.27"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"4", ",", "23.382"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"4.5", ",", "25.350"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"5", ",", "27.122"}], "}"}]}], "}"}]}], 
+  ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"fermienergy", "=", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"1.5", ",", "13.97008"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"2", ",", "15.37149"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"2.5", ",", "17.6487"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"3", ",", "19.67594"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"3.5", ",", "21.5362"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"4", ",", "23.5896"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"4.5", ",", "25.57271"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"5", ",", "27.17437"}], "}"}]}], "}"}]}], 
+  ";"}], "\[IndentingNewLine]", 
+ RowBox[{"ListPlot", "[", 
+  RowBox[{
+   RowBox[{"{", 
+    RowBox[{"energyxifermi", ",", "fermienergy"}], "}"}], ",", 
+   RowBox[{"PlotStyle", "->", 
+    RowBox[{"{", 
+     RowBox[{"Red", ",", "Blue"}], "}"}]}], ",", 
+   RowBox[{"Frame", "->", "True"}], ",", 
+   RowBox[{"PlotRange", "->", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{"1.45", ",", "5.1"}], "}"}], ",", 
+      RowBox[{"{", 
+       RowBox[{"5", ",", "30"}], "}"}]}], "}"}]}], ",", 
+   RowBox[{"FrameLabel", "\[Rule]", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"HoldForm", "[", "\"\<E\>\"", "]"}], ",", "None"}], "}"}], 
+      ",", 
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"HoldForm", "[", "T", "]"}], ",", "None"}], "}"}]}], "}"}]}], 
+   ",", 
+   RowBox[{"PlotLabel", "\[Rule]", "None"}], ",", 
+   RowBox[{"LabelStyle", "\[Rule]", 
+    RowBox[{"{", 
+     RowBox[{"10", ",", 
+      RowBox[{"GrayLevel", "[", "0", "]"}]}], "}"}]}]}], "]"}]}], "Input",
+ CellChangeTimes->{{3.918982741791181*^9, 3.918982941837369*^9}, {
+  3.918982983176697*^9, 3.918982991306181*^9}, {3.9189838839451313`*^9, 
+  3.918983924712191*^9}, {3.9189839783593807`*^9, 3.918984036856789*^9}, {
+  3.918988637739869*^9, 3.918988642498225*^9}, {3.918988673883862*^9, 
+  3.918988681454914*^9}},
+ CellLabel->
+  "In[5579]:=",ExpressionUUID->"86227127-18d2-4b46-9610-fccebafccf2d"],
+
+Cell[BoxData[
+ GraphicsBox[{{}, {
+    {RGBColor[1, 0, 0], PointSize[0.012833333333333334`], AbsoluteThickness[
+     1.6], PointBox[{{1.5, 12.8637}, {2., 14.963}, {2.5, 17.26}, {3., 
+      19.312}, {3.5, 21.27}, {4., 23.382}, {4.5, 25.35}, {5., 27.122}}]}, 
+    {RGBColor[0, 0, 1], PointSize[0.012833333333333334`], AbsoluteThickness[
+     1.6], PointBox[{{1.5, 13.97008}, {2., 15.37149}, {2.5, 17.6487}, {3., 
+      19.67594}, {3.5, 21.5362}, {4., 23.5896}, {4.5, 25.57271}, {5., 
+      27.17437}}]}}, {{}, {}}},
+  AspectRatio->NCache[GoldenRatio^(-1), 0.6180339887498948],
+  Axes->{True, True},
+  AxesLabel->{None, None},
+  AxesOrigin->{1.45, 5.},
+  DisplayFunction->Identity,
+  Frame->{{True, True}, {True, True}},
+  FrameLabel->{{
+     FormBox[
+      TagBox["\"E\"", HoldForm], TraditionalForm], None}, {
+     FormBox[
+      TagBox["T", HoldForm], TraditionalForm], None}},
+  FrameTicks->{{Automatic, Automatic}, {Automatic, Automatic}},
+  GridLines->{None, None},
+  GridLinesStyle->Directive[
+    GrayLevel[0.5, 0.4]],
+  LabelStyle->{10, 
+    GrayLevel[0]},
+  Method->{
+   "OptimizePlotMarkers" -> True, "OptimizePlotMarkers" -> True, 
+    "CoordinatesToolOptions" -> {"DisplayFunction" -> ({
+        Identity[
+         Part[#, 1]], 
+        Identity[
+         Part[#, 2]]}& ), "CopiedValueFunction" -> ({
+        Identity[
+         Part[#, 1]], 
+        Identity[
+         Part[#, 2]]}& )}},
+  PlotRange->{{1.45, 5.1}, {5, 30}},
+  PlotRangeClipping->True,
+  PlotRangePadding->{{0, 0}, {0, 0}},
+  Ticks->{Automatic, Automatic}]], "Output",
+ CellChangeTimes->{3.920799614042941*^9},
+ CellLabel->
+  "Out[5581]=",ExpressionUUID->"cc32c7e3-80c0-4d31-a7c7-1c5bb08db285"]
+}, Open  ]]
+},
+WindowSize->{808, 849},
+WindowMargins->{{124, Automatic}, {Automatic, 24}},
+FrontEndVersion->"12.3 for Mac OS X x86 (64-bit) \
+(2021\:5e745\:670811\:65e5)",
+StyleDefinitions->"Default.nb",
+ExpressionUUID->"7b92699d-3178-4ed8-bcdf-ee2605e91671"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[CellGroupData[{
+Cell[580, 22, 2741, 80, 236, "Input",ExpressionUUID->"86227127-18d2-4b46-9610-fccebafccf2d"],
+Cell[3324, 104, 1669, 43, 284, "Output",ExpressionUUID->"cc32c7e3-80c0-4d31-a7c7-1c5bb08db285"]
+}, Open  ]]
+}
+]
+*)
+
+(* End of internal cache information *)
+

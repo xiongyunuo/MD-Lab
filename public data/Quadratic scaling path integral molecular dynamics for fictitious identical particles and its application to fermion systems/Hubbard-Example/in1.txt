@@ -1,0 +1,13 @@
+Seed 2
+Na 72
+Nb 72
+P 40
+insteps 2000000
+MDsteps 1000000
+T 3.0
+vi 1
+site 14
+L 1.0
+h 1.0
+g 1
+s 0.5
