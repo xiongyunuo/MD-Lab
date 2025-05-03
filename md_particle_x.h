@@ -1,7 +1,7 @@
 #ifndef MD_PARTICLE_X_H
 #define MD_PARTICLE_X_H
 
-#define MD_DIMENSION_X 2
+#define MD_DIMENSION_X 3
 #define MD_NHC_LENGTH_X 8
 #define MD_kB_X 1.0
 #define MD_hBar_X 1.0
@@ -102,6 +102,7 @@ typedef struct {
   cl_kernel aden_kernel;
   int points;
   cl_mem pc_mem;
+  cl_kernel cSk_kernel;
 #endif
 } md_simulation_t_x;
 

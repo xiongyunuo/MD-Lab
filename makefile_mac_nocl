@@ -1,7 +1,7 @@
 CC = gcc -mmacosx-version-min=10.10
 OPENCL_FLAGS = 
 FLAGS = -Wall -Wundef -Wunused-parameter -Wno-deprecated-declarations -fno-common -fPIC -O2 $(OPENCL_FLAGS)
-OBJECTS = md_util_x.o md_simulation_x.o md_statistics_x.o md_pimd_x.o
+OBJECTS = md_util_x.o md_simulation_x.o md_statistics_x.o md_pimd_x.o md_worm_x.o
 
 libxmd_x.dylib : $(OBJECTS) xmd_config
 	$(CC) -dynamiclib -install_name '@rpath/libxmd_x.dylib' -current_version 1.0 $(OBJECTS) -o libxmd_x.dylib -lpthread
@@ -20,6 +20,9 @@ md_statistics_x.o : md_statistics_x.c md_statistics_x.h md_particle_x.h md_simul
 
 md_pimd_x.o : md_pimd_x.c md_pimd_x.h md_particle_x.h md_util_x.h md_simulation_x.h md_statistics_x.h
 	$(CC) -c md_pimd_x.c -o md_pimd_x.o $(FLAGS)
+
+md_worm_x.o : md_worm_x.c md_worm_x.h md_pimd_x.h md_particle_x.h md_util_x.h md_simulation_x.h md_statistics_x.h
+	$(CC) -c md_worm_x.c -o md_worm_x.o $(FLAGS)
 
 .PHONY : clean
 clean :

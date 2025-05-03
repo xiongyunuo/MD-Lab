@@ -80,10 +80,10 @@ md_simulation_t_x *md_simulation_sync_host_x(md_simulation_t_x *sim, int read_on
 md_simulation_t_x *md_alloc_simulation_x(int N, int f, int fc, int box_type);
 simulation_box_t_x *md_alloc_box_x(int box_type);
 int md_init_particle_face_center_3d_lattice_pos_x(md_simulation_t_x *sim, md_num_t_x *center, md_num_t_x *length, md_num_t_x fluc, md_num_t_x eps);
-void md_init_maxwell_vel_x(md_simulation_t_x *sim, md_num_t_x T);
-void md_init_particle_mass_x(md_simulation_t_x *sim, md_num_t_x m, int start, int end);
-void md_init_nhc_x(md_simulation_t_x *sim, md_num_t_x Q, int start, int end, md_num_t_x fp);
-void md_init_nd_rect_box_x(simulation_box_t_x *box, md_num_t_x *L);
+int md_init_maxwell_vel_x(md_simulation_t_x *sim, md_num_t_x T);
+int md_init_particle_mass_x(md_simulation_t_x *sim, md_num_t_x m, int start, int end);
+int md_init_nhc_x(md_simulation_t_x *sim, md_num_t_x Q, int start, int end, md_num_t_x fp);
+int md_init_nd_rect_box_x(simulation_box_t_x *box, md_num_t_x *L);
 int md_fprint_particle_pos_x(FILE *out, md_simulation_t_x *sim);
 int md_fprint_particle_vel_x(FILE *out, md_simulation_t_x *sim);
 int md_fprint_particle_force_x(FILE *out, md_simulation_t_x *sim);
@@ -93,5 +93,58 @@ void md_set_seed_x(unsigned int seed);
 md_num_t_x md_random_uniform_x(md_num_t_x a, md_num_t_x b);
 md_num_t_x md_random_gaussian_x(void);
 md_num_t_x md_get_quick_Q_x(md_num_t_x T, md_num_t_x omega);
+int md_fread_particle_pos_x(FILE *in, md_simulation_t_x *sim);
+int md_fread_particle_vel_x(FILE *in, md_simulation_t_x *sim);
+int md_fread_nhcs_x(FILE *in, md_simulation_t_x *sim);
+
+md_num_t_x md_laguerre_poly_x(int n, md_num_t_x x);
+md_num_t_x md_coulomb_Cn_x(int n, md_num_t_x Z);
+md_num_t_x md_coulomb_En_x(int n, md_num_t_x Z, md_num_t_x ke);
+md_num_t_x md_r_magnitude_x(md_num_t_x *r);
+md_num_t_x md_coulomb_rho_b_x(int nmax, md_num_t_x Z, md_num_t_x ke, md_num_t_x beta, md_num_t_x *r, md_num_t_x *r2);
+md_num_t_x md_coulomb_diag_rho_b_x(int nmax, md_num_t_x Z, md_num_t_x ke, md_num_t_x beta, md_num_t_x *r);
+md_num_t_x md_coulomb_wave_Ak_x(int k, md_num_t_x eta);
+md_num_t_x md_coulomb_wave_Bk_x(int k, md_num_t_x eta, md_num_t_x rho);
+md_num_t_x md_coulomb_wave_func_x(md_num_t_x eta, md_num_t_x rho, int kmax);
+void md_log_gamma_x(md_num_t_x re, md_num_t_x im, md_num_t_x *res, md_num_t_x *res2);
+md_num_t_x md_1F1_integrand_x(md_num_t_x u);
+md_num_t_x md_1F1_im_integrand_x(md_num_t_x u);
+void md_1F1_x(md_num_t_x a, md_num_t_x ia, md_num_t_x b, md_num_t_x ib, md_num_t_x z, md_num_t_x iz, md_num_t_x *res, md_num_t_x *res2);
+md_num_t_x md_coulomb_wave_C_x(md_num_t_x eta);
+md_num_t_x md_coulomb_wave_F0_x(md_num_t_x eta, md_num_t_x rho, int kmax);
+md_num_t_x md_coulomb_wave_func_star_x(md_num_t_x eta, md_num_t_x rho, int kmax);
+md_num_t_x md_coulomb_wave_dF0_x(md_num_t_x eta, md_num_t_x rho, int kmax);
+md_num_t_x md_coulomb_wave_integrand_x(md_num_t_x k);
+md_num_t_x md_coulomb_wave_diag_integrand_x(md_num_t_x k);
+md_num_t_x md_romberg_integral_x(md_num_t_x (*f)(md_num_t_x), md_num_t_x a, md_num_t_x b, int max_steps, md_num_t_x acc);
+md_num_t_x md_coulomb_rho_c_x(int kmax, md_num_t_x Z, md_num_t_x ke, md_num_t_x beta, md_num_t_x *r, md_num_t_x *r2);
+md_num_t_x md_coulomb_diag_rho_c_x(int kmax, md_num_t_x Z, md_num_t_x ke, md_num_t_x beta, md_num_t_x *r);
+md_num_t_x md_coulomb_free_rho_x(md_num_t_x ke, md_num_t_x beta, md_num_t_x *r, md_num_t_x *r2);
+
+typedef md_num_t_x (*md_pa_func_t_x)(md_num_t_x *r1, md_num_t_x *r2, md_num_t_x beta, int N, md_num_t_x *params);
+
+typedef struct {
+  md_num_t_x beta, ka, Z;
+  int ucount, ducount;
+  md_num_t_x *r;
+  md_num_t_x *u;
+  md_num_t_x *A;
+  md_num_t_x *r2;
+  md_num_t_x *du;
+  md_num_t_x *dA;
+  int Npar;
+  md_num_t_x *params;
+  md_pa_func_t_x pa_func;
+} md_pa_table_t_x;
+
+md_num_t_x md_pa_delta_x(md_num_t_x *r1, md_num_t_x *r2, md_num_t_x beta, int N, md_num_t_x *params);
+
+md_pa_table_t_x *md_read_pa_table_x(FILE *in);
+md_num_t_x md_calc_pa_pair_energy_x(md_pa_table_t_x *pa, md_num_t_x *r, md_num_t_x *r2);
+md_num_t_x md_calc_pa_pair_U_x(md_pa_table_t_x *pa, md_num_t_x *r, md_num_t_x *r2);
+void md_calc_pa_deri_1_x(md_pa_table_t_x *pa, md_num_t_x *r, md_num_t_x *r2, md_num_t_x *dr, md_num_t_x rincre);
+void md_calc_pa_deri_2_x(md_pa_table_t_x *pa, md_num_t_x *r, md_num_t_x *r2, md_num_t_x *dr, md_num_t_x rincre);
+
+int md_simulation_copy_to_x(md_simulation_t_x *sim, md_simulation_t_x *sim2);
 
 #endif

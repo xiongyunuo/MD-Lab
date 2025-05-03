@@ -558,6 +558,7 @@ md_num_t_x md_periodic_helium_energy_x(md_num_t_x *p1, md_num_t_x *p2, md_num_t_
   }\
   if (lid == 0)\
     output[get_group_id(0)] = target[0];\
+  barrier(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);\
 }
 
 MD_CALC_PAIR_ENERGY_KX(pLJ, md_LJ_periodic_energy_x)
@@ -594,6 +595,7 @@ kernel void md_calc_temperature_kx(global md_particle_t_x *particles, global md_
   }
   if (lid == 0)
     output[get_group_id(0)] = target[0];
+  barrier(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
 }
 
 kernel void md_calc_pair_correlation_kx(global md_particle_t_x *particles, global md_num_t_x *den, int N, int points, int image, md_num_t_x rmax, nd_rect_t_x rect) {
@@ -620,7 +622,7 @@ kernel void md_calc_pair_correlation_kx(global md_particle_t_x *particles, globa
       r = md_distance_x(p1, p2);
     int index = (int)(r/incre);
     if (index >= points)
-      index = points-1;
+      continue; //index = points-1;
     den[i*points+index] += 1.0/N;
   }
 }
@@ -747,6 +749,7 @@ kernel void md_pimd_xminE_kx(global md_num_t_x *ENk, global md_num_t_x *VBN, glo
   }
   if (lid == 0)
     output[get_group_id(0)] = target[0];
+  barrier(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
 }
 
 kernel void md_pimd_fill_VB_kx(global md_num_t_x *ENk, global md_num_t_x *VBN, global int *Eindices, global md_num_t_x *output, int N, int N2, md_num_t_x vi, md_num_t_x beta, global md_num_t_x *minE, local md_num_t_x *target) {
@@ -788,6 +791,7 @@ kernel void md_pimd_fill_VB_kx(global md_num_t_x *ENk, global md_num_t_x *VBN, g
   }
   if (lid == 0)
     output[get_group_id(0)] = target[0];
+  barrier(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
 }
 
 void md_pimd_dENk_x(global md_particle_t_x *particles, int N2, int k, int l, int j, int image, local md_num_t_x *dENk, int P, md_num_t_x omegaP, md_num_t_x *L);
@@ -896,6 +900,7 @@ kernel void md_pimd_calc_VBN_energy_kx(global md_num_t_x *ENk, global md_num_t_x
   }
   if (lid == 0)
     output[get_group_id(0)] = target[0];
+  barrier(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
 }
 
 #define MD_PIMD_CALC_TRAP_FORCE_KX(name, func) kernel void md_pimd_calc_trap_force_ ## name ## _kx(global md_particle_t_x *particles, int N, int P, md_inter_params_t_x params, nd_rect_t_x rect) {\
@@ -944,6 +949,7 @@ MD_PIMD_CALC_TRAP_FORCE_KX(Hubbard, md_hubbard_trap_force_x)
   }\
   if (lid == 0)\
     output[get_group_id(0)] = target[0];\
+  barrier(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);\
 }\
 
 MD_PIMD_CALC_TRAP_ENERGY_KX(Htrap, md_harmonic_trap_energy_x)
@@ -1028,6 +1034,7 @@ kernel void md_pimd_update_pair_force_kx(global md_particle_t_x *particles, glob
   }\
   if (lid == 0)\
     output[get_group_id(0)] = target[0];\
+  barrier(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);\
 }
 
 MD_PIMD_CALC_PAIR_ENERGY_KX(pLJ, md_LJ_periodic_energy_x)
@@ -1059,7 +1066,7 @@ kernel void md_pimd_calc_density_distribution_kx(global md_particle_t_x *particl
       r = md_distance_x(p1, rect2.L);
     index = (int)(r/incre);
     if (index >= points)
-      index = points-1;
+      continue; //index = points-1;
     den[i*points+index] += 1.0/P;
   }
 }
@@ -1178,6 +1185,7 @@ kernel void md_pimd_fast_xminE_kx(global md_num_t_x *ENk, global md_num_t_x *VBN
   }
   if (lid == 0)
     output[get_group_id(0)] = target[0];
+  barrier(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
 }
 
 md_num_t_x md_pimd_fast_xexp_x(md_num_t_x l, md_num_t_x k, md_num_t_x E, md_num_t_x EE, md_num_t_x beta, md_num_t_x vi);
@@ -1247,6 +1255,7 @@ kernel void md_pimd_fast_fill_VB_kx(global md_num_t_x *ENk, global md_num_t_x *V
   }
   if (lid == 0)
     output[get_group_id(0)] = target[0];
+  barrier(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
 }
 
 kernel void md_pimd_fast_fill_G_kx(global md_num_t_x *ENk, global md_num_t_x *VBN, global md_num_t_x *tmpV, global md_num_t_x *G, global int *Eindices, int N, md_num_t_x vi, md_num_t_x beta) {
@@ -1516,6 +1525,7 @@ kernel void md_pimd_calc_VBN2_energy_kx(global md_num_t_x *ENk, global md_num_t_
   }
   if (lid == 0)
     output[get_group_id(0)] = target[0];
+  barrier(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
 }
 
 kernel void md_pimd_add_eVBN2_stats_kx(global md_num_t_x *res, global md_num_t_x *eVBN, int N, md_num_t_x beta) {
@@ -1526,7 +1536,7 @@ kernel void md_pimd_add_eVBN2_stats_kx(global md_num_t_x *res, global md_num_t_x
   res[0] += MD_DIMENSION_X*N/(2*beta);
 }
 
-kernel void md_pimd_calc_virial_energy_kx(global md_particle_t_x *particles, global md_num_t_x *output, int N, int P, local md_num_t_x *target) {
+kernel void md_pimd_calc_virial_energy_kx(global md_particle_t_x *particles, global md_num_t_x *output, int N, int P, local md_num_t_x *target, int image, nd_rect_t_x rect) {
   const int gid = get_global_id(0);
   const int lid = get_local_id(0);
   if (gid < N*P) {
@@ -1537,8 +1547,12 @@ kernel void md_pimd_calc_virial_energy_kx(global md_particle_t_x *particles, glo
     int index, index2;
     index = MD_PIMD_INDEX_X(l, j, P);
     index2 = MD_PIMD_INDEX_X(l, 1, P);
-    for (i = 0; i < MD_DIMENSION_X; ++i)
-      res2 += -(particles[index].x[i]-particles[index2].x[i])*particles[index].f[i]*particles[index].m;
+    for (i = 0; i < MD_DIMENSION_X; ++i) {
+      if (image)
+        res2 += -md_minimum_image_x(particles[index].x[i]-particles[index2].x[i], rect.L[i])*particles[index].f[i]*particles[index].m;
+      else
+        res2 += -(particles[index].x[i]-particles[index2].x[i])*particles[index].f[i]*particles[index].m;
+    }
     target[lid] = res2;
   }
   else
@@ -1559,6 +1573,7 @@ kernel void md_pimd_calc_virial_energy_kx(global md_particle_t_x *particles, glo
   }
   if (lid == 0)
     output[get_group_id(0)] = target[0];
+  barrier(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);
 }
 
 #define MD_PIMD_FILL_PAIR_FORCE_2_KX(name, func) kernel void md_pimd_fill_pair_force_2_ ## name ## _kx(global md_particle_t_x *particles, global md_particle_t_x *particles2, global md_num_t_x *forces, int N2, int N, int P, int jP, md_inter_params_t_x params, nd_rect_t_x rect) {\
@@ -1596,8 +1611,10 @@ kernel void md_pimd_update_pair_force_2_1_kx(global md_particle_t_x *particles, 
   int index2 = MD_PIMD_INDEX_X(i+1, jP, P);
   for (j = 0; j < N2; ++j) {
     index = i*N2+j;
-    for (d = 0; d < MD_DIMENSION_X; ++d)
+    for (d = 0; d < MD_DIMENSION_X; ++d) {
       particles[index2].f[d] += forces[MD_DIMENSION_X*index+d]/P;
+      forces[MD_DIMENSION_X*index+d] *= particles[index2].m;
+    }
   }
 }
 
@@ -1610,7 +1627,7 @@ kernel void md_pimd_update_pair_force_2_2_kx(global md_particle_t_x *particles, 
   for (j = 0; j < N; ++j) {
     index = j*N2+i;
     for (d = 0; d < MD_DIMENSION_X; ++d)
-      particles[index2].f[d] -= forces[MD_DIMENSION_X*index+d]/P;
+      particles[index2].f[d] -= forces[MD_DIMENSION_X*index+d]/P/particles[index2].m;
   }
 }
 
@@ -1646,6 +1663,7 @@ kernel void md_pimd_update_pair_force_2_2_kx(global md_particle_t_x *particles, 
   }\
   if (lid == 0)\
     output[get_group_id(0)] = target[0];\
+  barrier(CLK_LOCAL_MEM_FENCE | CLK_GLOBAL_MEM_FENCE);\
 }
 
 MD_PIMD_CALC_PAIR_ENERGY_2_KX(pLJ, md_LJ_periodic_energy_x)
@@ -1676,6 +1694,243 @@ kernel void md_pimd_calc_ITCF_kx(global md_particle_t_x *particles, global md_nu
       idx = 0;
     if (idx >= points)
       idx = points-1;
-    den[l*points+idx] += 1.0/N;
+    den[l*points+idx] += 1.0/P;
   }
+}
+
+kernel void md_pimd_calc_ITCF_2_kx(global md_particle_t_x *particles, global md_num_t_x *den, int N, int P, int points, int pi, md_num_t_x rmin, md_num_t_x rmax, global md_particle_t_x *particles2, int N2) {
+  int l = get_global_id(0);
+  if (l >= N)
+    return;
+  int j;
+  for (j = 0; j < points; ++j)
+    den[l*points+j] = 0;
+  int n = (int)sqrt((md_num_t_x)points);
+  md_num_t_x incre = (rmax-rmin)/n;
+  int index, index2;
+  for (j = 1; j <= N2; ++j) {
+    index = MD_PIMD_INDEX_X(l, 1, P);
+    index2 = MD_PIMD_INDEX_X(j, pi, P);
+    int i1 = (int)((particles[index].x[0]-rmin)/incre);
+    int i2 = (int)((particles2[index2].x[0]-rmin)/incre);
+    int idx = i1*n+i2;
+    if (idx < 0)
+      idx = 0;
+    if (idx >= points)
+      idx = points-1;
+    den[l*points+idx] += 1.0/P;
+    idx = i2*n+i1;
+    if (idx < 0)
+      idx = 0;
+    if (idx >= points)
+      idx = points-1;
+    den[l*points+idx] += 1.0/P;
+  }
+}
+
+kernel void md_pimd_calc_pair_correlation_kx(global md_particle_t_x *particles, global md_num_t_x *den, int N, int P, int points, int pi, md_num_t_x rmax, md_num_t_x norm, int image, nd_rect_t_x rect) {
+  int l = get_global_id(0);
+  if (l >= N)
+    return;
+  int j;
+  for (j = 0; j < points; ++j)
+    den[l*points+j] = 0;
+  md_num_t_x incre = rmax/points;
+  md_num_t_x r;
+  md_num_t_x p1[MD_DIMENSION_X], p2[MD_DIMENSION_X];
+  int d;
+  int index, index2;
+  index = MD_PIMD_INDEX_X(l, 1, P);
+  for (d = 0; d < MD_DIMENSION_X; ++d)
+    p1[d] = particles[index].x[d];
+  for (j = 0; j < N; ++j) {
+    if (l == j)
+      continue;
+    index2 = MD_PIMD_INDEX_X(j, pi, P);
+    for (d = 0; d < MD_DIMENSION_X; ++d)
+      p2[d] = particles[index2].x[d];
+    if (image)
+      r = md_minimum_image_distance_x(p1, p2, rect.L);
+    else
+      r = md_distance_x(p1, p2);
+    int index3 = (int)(r/incre);
+    if (index3 >= points)
+      continue; //index3 = points-1;
+    den[l*points+index3] += 1.0/norm;
+  }
+}
+
+kernel void md_pimd_calc_pair_correlation_2_kx(global md_particle_t_x *particles, global md_num_t_x *den, int N, int P, int points, int pi, md_num_t_x rmax, md_num_t_x norm, int image, nd_rect_t_x rect, global md_particle_t_x *particles2, int N2) {
+  int l = get_global_id(0);
+  if (l >= N)
+    return;
+  int j;
+  for (j = 0; j < points; ++j)
+    den[l*points+j] = 0;
+  md_num_t_x incre = rmax/points;
+  md_num_t_x r;
+  md_num_t_x p1[MD_DIMENSION_X], p2[MD_DIMENSION_X];
+  int d;
+  int index, index2;
+  index = MD_PIMD_INDEX_X(l, 1, P);
+  for (d = 0; d < MD_DIMENSION_X; ++d)
+    p1[d] = particles[index].x[d];
+  for (j = 0; j < N2; ++j) {
+    index2 = MD_PIMD_INDEX_X(j, pi, P);
+    for (d = 0; d < MD_DIMENSION_X; ++d)
+      p2[d] = particles2[index2].x[d];
+    if (image)
+      r = md_minimum_image_distance_x(p1, p2, rect.L);
+    else
+      r = md_distance_x(p1, p2);
+    int index3 = (int)(r/incre);
+    if (index3 >= points)
+      continue; //index3 = points-1;
+    den[l*points+index3] += 1.0/norm;
+  }
+}
+
+kernel void md_calc_Sk_structure_kx(global md_particle_t_x *particles, global md_num_t_x *den, int N, int points, md_num_t_x q0, md_num_t_x qincre) {
+  int j = get_global_id(0);
+  if (j >= points)
+    return;
+  int l, i;
+  md_num_t_x q = q0+j*qincre;
+  md_num_t_x res = 0;
+  for (i = 0; i < MD_DIMENSION_X; ++i) {
+    md_num_t_x sum = 0;
+    for (l = 0; l < N; ++l)
+      sum += cos(q*particles[l].x[i]);
+    res += sum*sum/N;
+    sum = 0;
+    for (l = 0; l < N; ++l)
+      sum += sin(q*particles[l].x[i]);
+    res += sum*sum/N;
+  }
+  res /= MD_DIMENSION_X;
+  den[j] += res;
+}
+
+kernel void md_pimd_calc_Sk_structure_kx(global md_particle_t_x *particles, global md_num_t_x *den, int N, int P, int points, md_num_t_x q0, md_num_t_x qincre, int pi) {
+  int j = get_global_id(0);
+  if (j >= points)
+    return;
+  int l, i;
+  md_num_t_x q = q0+j*qincre;
+  md_num_t_x res = 0;
+  for (i = 0; i < MD_DIMENSION_X; ++i) {
+    md_num_t_x sum = 0;
+    md_num_t_x sum2 = 0;
+    int index;
+    for (l = 0; l < N; ++l) {
+      index = MD_PIMD_INDEX_X(l+1, 1, P);
+      sum += cos(q*particles[index].x[i]);
+    }
+    for (l = 0; l < N; ++l) {
+      index = MD_PIMD_INDEX_X(l+1, pi, P);
+      sum2 += cos(q*particles[index].x[i]);
+    }
+    res += sum*sum2/N;
+    sum = 0;
+    sum2 = 0;
+    for (l = 0; l < N; ++l) {
+      index = MD_PIMD_INDEX_X(l+1, 1, P);
+      sum += sin(q*particles[index].x[i]);
+    }
+    for (l = 0; l < N; ++l) {
+      index = MD_PIMD_INDEX_X(l+1, pi, P);
+      sum2 += sin(q*particles[index].x[i]);
+    }
+    res += sum*sum2/N;
+  }
+  res /= MD_DIMENSION_X;
+  den[j] += res;
+}
+
+kernel void md_pimd_calc_Sk_structure_2_kx(global md_particle_t_x *particles, global md_num_t_x *den, int N, int P, int points, md_num_t_x q0, md_num_t_x qincre, int pi, global md_particle_t_x *particles2, int N2, int P2) {
+  int j = get_global_id(0);
+  if (j >= points)
+    return;
+  int l, i;
+  md_num_t_x q = q0+j*qincre;
+  md_num_t_x res = 0;
+  for (i = 0; i < MD_DIMENSION_X; ++i) {
+    md_num_t_x sum = 0;
+    md_num_t_x sum2 = 0;
+    int index;
+    for (l = 0; l < N; ++l) {
+      index = MD_PIMD_INDEX_X(l+1, 1, P);
+      sum += cos(q*particles[index].x[i]);
+    }
+    for (l = 0; l < N2; ++l) {
+      index = MD_PIMD_INDEX_X(l+1, pi, P2);
+      sum2 += cos(q*particles2[index].x[i]);
+    }
+    res += sum*sum2/N;
+    sum = 0;
+    sum2 = 0;
+    for (l = 0; l < N; ++l) {
+      index = MD_PIMD_INDEX_X(l+1, 1, P);
+      sum += sin(q*particles[index].x[i]);
+    }
+    for (l = 0; l < N2; ++l) {
+      index = MD_PIMD_INDEX_X(l+1, pi, P2);
+      sum2 += sin(q*particles2[index].x[i]);
+    }
+    res += sum*sum2/N;
+  }
+  res /= MD_DIMENSION_X;
+  den[j] += res;
+}
+
+kernel void md_pimd_calc_Sk_structure_full_2_kx(global md_particle_t_x *particles, global md_num_t_x *den, int N, int P, int points, md_num_t_x q0, md_num_t_x qincre, int pi, global md_particle_t_x *particles2, int N2, int P2) {
+  int j = get_global_id(0);
+  if (j >= points)
+    return;
+  int l, i;
+  md_num_t_x q = q0+j*qincre;
+  md_num_t_x res = 0;
+  for (i = 0; i < MD_DIMENSION_X; ++i) {
+    md_num_t_x sum = 0;
+    md_num_t_x sum2 = 0;
+    int index;
+    for (l = 0; l < N; ++l) {
+      index = MD_PIMD_INDEX_X(l+1, 1, P);
+      sum += cos(q*particles[index].x[i]);
+    }
+    for (l = 0; l < N2; ++l) {
+      index = MD_PIMD_INDEX_X(l+1, 1, P2);
+      sum += cos(q*particles2[index].x[i]);
+    }
+    for (l = 0; l < N; ++l) {
+      index = MD_PIMD_INDEX_X(l+1, pi, P);
+      sum2 += cos(q*particles[index].x[i]);
+    }
+    for (l = 0; l < N2; ++l) {
+      index = MD_PIMD_INDEX_X(l+1, pi, P2);
+      sum2 += cos(q*particles2[index].x[i]);
+    }
+    res += sum*sum2/(N+N2);
+    sum = 0;
+    sum2 = 0;
+    for (l = 0; l < N; ++l) {
+      index = MD_PIMD_INDEX_X(l+1, 1, P);
+      sum += sin(q*particles[index].x[i]);
+    }
+    for (l = 0; l < N2; ++l) {
+      index = MD_PIMD_INDEX_X(l+1, 1, P2);
+      sum += sin(q*particles2[index].x[i]);
+    }
+    for (l = 0; l < N; ++l) {
+      index = MD_PIMD_INDEX_X(l+1, pi, P);
+      sum2 += sin(q*particles[index].x[i]);
+    }
+    for (l = 0; l < N2; ++l) {
+      index = MD_PIMD_INDEX_X(l+1, pi, P2);
+      sum2 += sin(q*particles2[index].x[i]);
+    }
+    res += sum*sum2/(N+N2);
+  }
+  res /= MD_DIMENSION_X;
+  den[j] += res;
 }

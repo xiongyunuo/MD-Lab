@@ -91,6 +91,17 @@ md_num_t_x md_minimum_image_distance_x(md_num_t_x *p1, md_num_t_x *p2, md_num_t_
   return sqrt(d);
 }
 
+md_num_t_x md_minimum_image_distance_2_x(md_num_t_x *p1, md_num_t_x *p2, md_num_t_x *L, int *w1, int *w2) {
+  md_num_t_x d = 0;
+  md_num_t_x tmp;
+  int i;
+  for (i = 0; i < MD_DIMENSION_X; ++i) {
+    tmp = (p1[i]+w1[i]*L[i])-(p2[i]+w2[i]*L[i]);
+    d += tmp*tmp;
+  }
+  return sqrt(d);
+}
+
 md_num_t_x md_distance_x(md_num_t_x *p1, md_num_t_x *p2) {
   md_num_t_x d = 0;
   md_num_t_x tmp;
@@ -119,6 +130,12 @@ void md_harmonic_trap_force_x(md_num_t_x *p1, md_num_t_x *f, md_num_t_x *MD_UNUS
     f[i] += -md_trap_frequency_x*md_trap_frequency_x*(p1[i]-md_trap_center_x[i]);
 }
 
+void md_neg_harmonic_trap_force_x(md_num_t_x *p1, md_num_t_x *f, md_num_t_x *MD_UNUSED_X(L), md_num_t_x MD_UNUSED_X(m)) {
+  int i;
+  for (i = 0; i < MD_DIMENSION_X; ++i)
+    f[i] -= -md_trap_frequency_x*md_trap_frequency_x*(p1[i]-md_trap_center_x[i]);
+}
+
 void md_set_harmonic_trap_frequency_x(md_num_t_x f) {
   md_trap_frequency_x = f;
 }
@@ -127,6 +144,20 @@ void md_set_harmonic_trap_center_x(md_num_t_x *center) {
   int i;
   for (i = 0; i < MD_DIMENSION_X; ++i)
     md_trap_center_x[i] = center[i];
+}
+
+md_num_t_x md_trap_frequency_2_x[MD_DIMENSION_X];
+
+void md_set_harmonic_trap_frequency_2_x(md_num_t_x *f) {
+  int i;
+  for (i = 0; i < MD_DIMENSION_X; ++i)
+    md_trap_frequency_2_x[i] = f[i];
+}
+
+void md_harmonic_trap_force_2_x(md_num_t_x *p1, md_num_t_x *f, md_num_t_x *MD_UNUSED_X(L), md_num_t_x MD_UNUSED_X(m)) {
+  int i;
+  for (i = 0; i < MD_DIMENSION_X; ++i)
+    f[i] += -md_trap_frequency_2_x[i]*md_trap_frequency_2_x[i]*(p1[i]-md_trap_center_x[i]);
 }
 
 md_num_t_x md_gaussian_strength_x;
@@ -261,6 +292,59 @@ void md_coulomb_3d_ewald_force_x(md_num_t_x *p1, md_num_t_x *p2, md_num_t_x *f, 
       }
 }
 
+void md_coulomb_3d_ewald_force_R_x(md_num_t_x *p1, md_num_t_x *p2, md_num_t_x *f, md_num_t_x *L, md_num_t_x m) {
+  if (MD_DIMENSION_X != 3)
+    return;
+  md_num_t_x V = L[0]*L[1]*L[2];
+  md_num_t_x origin[3] = { 0, 0, 0 };
+  md_num_t_x g[3], r[3];
+  md_num_t_x G, R;
+  int i, j, k, d;
+  for (i = -md_coulomb_n_sum_x; i <= md_coulomb_n_sum_x; ++i)
+    for (j = -md_coulomb_n_sum_x; j <= md_coulomb_n_sum_x; ++j)
+      for (k = -md_coulomb_n_sum_x; k <= md_coulomb_n_sum_x; ++k) {
+        if (i == 0 && j == 0 && k == 0)
+          continue;
+        g[0] = i/L[0];
+        g[1] = j/L[1];
+        g[2] = k/L[2];
+        G = md_distance_x(g, origin);
+        md_num_t_x dot = 2*M_PI*(g[0]*(p1[0]-p2[0])+g[1]*(p1[1]-p2[1])+g[2]*(p1[2]-p2[2]));
+        md_num_t_x mult = md_coulomb_strength_x*sin(dot)*pow(G,-2)*exp(-M_PI*M_PI*G*G/(md_coulomb_truc_x*md_coulomb_truc_x))/(V*M_PI);
+        for (d = 0; d < MD_DIMENSION_X; ++d)
+          f[d] += 2*M_PI*g[d]*mult/m;
+      }
+  md_num_t_x dis[3];
+  for (i = -md_coulomb_n_sum_x; i <= md_coulomb_n_sum_x; ++i)
+    for (j = -md_coulomb_n_sum_x; j <= md_coulomb_n_sum_x; ++j)
+      for (k = -md_coulomb_n_sum_x; k <= md_coulomb_n_sum_x; ++k) {
+        r[0] = p2[0]+i*L[0];
+        r[1] = p2[1]+j*L[1];
+        r[2] = p2[2]+k*L[2];
+        for (d = 0; d < MD_DIMENSION_X; ++d)
+          dis[d] = fabs(r[d]-p1[d])-fabs(md_minimum_image_x(r[d]-p1[d], L[d]));
+        if (fabs(dis[0]) < 1e-4 && fabs(dis[1]) < 1e-4 && fabs(dis[2]) < 1e-4)
+          continue;
+        R = md_distance_x(p1, r);
+        md_num_t_x mult = md_coulomb_strength_x*2*md_coulomb_truc_x*exp(-md_coulomb_truc_x*md_coulomb_truc_x*R*R)/(sqrt(M_PI)*R*R);
+        mult += md_coulomb_strength_x*erfc(md_coulomb_truc_x*R)/(R*R*R);
+        for (d = 0; d < MD_DIMENSION_X; ++d)
+          f[d] += (p1[d]-r[d])*mult/m;
+      }
+}
+
+void md_coulomb_3d_ewald_force_NI_x(md_num_t_x *p1, md_num_t_x *p2, md_num_t_x *f, md_num_t_x *L, md_num_t_x m) {
+  if (MD_DIMENSION_X != 3)
+    return;
+  int d;
+  md_num_t_x R;
+  R = md_minimum_image_distance_x(p1, p2, L);
+  md_num_t_x mult = md_coulomb_strength_x*2*md_coulomb_truc_x*exp(-md_coulomb_truc_x*md_coulomb_truc_x*R*R)/(sqrt(M_PI)*R*R);
+  mult += md_coulomb_strength_x*erfc(md_coulomb_truc_x*R)/(R*R*R);
+  for (d = 0; d < MD_DIMENSION_X; ++d)
+    f[d] += md_minimum_image_x(p1[d]-p2[d], L[d])*mult/m;
+}
+
 md_num_t_x md_hubbard_trap_strength_x;
 md_num_t_x md_hubbard_trap_frequency_x;
 
@@ -314,30 +398,64 @@ void md_periodic_helium_force_x(md_num_t_x *p1, md_num_t_x *p2, md_num_t_x *f, m
     f[i] += md_he_eps_x*mult*md_minimum_image_x(p1[i]-p2[i], L[i])/(r*md_he_rm_x*m);
 }
 
-void md_reset_force_x(md_simulation_t_x *sim) {
+md_num_t_x md_kelbg_beta_x;
+md_num_t_x md_kelbg_mu_x;
+int md_kelbg_P_x;
+
+void md_set_kelbg_parameters_x(md_num_t_x beta, md_num_t_x mu, int P) {
+  md_kelbg_beta_x = beta;
+  md_kelbg_mu_x = mu;
+  md_kelbg_P_x = P;
+}
+
+void md_periodic_kelbg_force_x(md_num_t_x *p1, md_num_t_x *p2, md_num_t_x *f, md_num_t_x *L, md_num_t_x m) {
+  md_num_t_x r = md_minimum_image_distance_x(p1, p2, L);
+  md_num_t_x eps = md_kelbg_beta_x/md_kelbg_P_x;
+  md_num_t_x lam = sqrt(eps/(2*md_kelbg_mu_x));
+  md_num_t_x mult = (1-exp(-r*r/(lam*lam)))/(r*r);
+  int i;
+  for (i = 0; i < MD_DIMENSION_X; ++i)
+    f[i] += md_coulomb_strength_x*mult*md_minimum_image_x(p1[i]-p2[i], L[i])/r/m;
+}
+
+int md_reset_force_x(md_simulation_t_x *sim) {
 #ifdef MD_USE_OPENCL_X
   cl_context context;
   cl_command_queue queue;
   cl_device_id device;
   int plat;
   cl_int status;
-  md_get_command_queue_x(&plat, NULL, &context, &device, &queue);
-  md_simulation_to_context_x(sim, context);
+  status = md_get_command_queue_x(&plat, NULL, &context, &device, &queue);
+  if (status != 0)
+    return status;
+  status = md_simulation_to_context_x(sim, context);
+  if (status != 0)
+    return status;
   cl_kernel kernel = NULL;
   if (sim->rf_kernel != NULL)
     kernel = sim->rf_kernel;
   else {
     kernel = clCreateKernel(md_programs_x[plat], "md_reset_force_kx", &status);
-    clSetKernelArg(kernel, 0, sizeof(cl_mem), &sim->particles_mem);
-    clSetKernelArg(kernel, 1, sizeof(int), &sim->N);
+    if (status != 0)
+      return status;
+    status = clSetKernelArg(kernel, 0, sizeof(cl_mem), &sim->particles_mem);
+    status |= clSetKernelArg(kernel, 1, sizeof(int), &sim->N);
+    if (status != 0)
+      return status;
     sim->rf_kernel = kernel;
   }
   int size[1];
   size[0] = MD_DIMENSION_X*sim->N;
   size_t local[1], global[1];
-  md_get_work_size_x(kernel, device, 1, size, global, local);
-  clEnqueueNDRangeKernel(queue, kernel, 1, NULL, global, local, 0, NULL, NULL);
-  md_update_queue_x(queue);
+  status = md_get_work_size_x(kernel, device, 1, size, global, local);
+  if (status != 0)
+    return status;
+  status = clEnqueueNDRangeKernel(queue, kernel, 1, NULL, global, local, 0, NULL, NULL);
+  if (status != 0)
+    return status;
+  status = md_update_queue_x(queue);
+  if (status != 0)
+    return status;
   sim->queue = queue;
   //cl_event events[1];
   //events[0] = md_simulation_sync_queue_x(sim, queue, &status);
@@ -350,17 +468,22 @@ void md_reset_force_x(md_simulation_t_x *sim) {
     for (j = 0; j < MD_DIMENSION_X; ++j)
       sim->particles[i].f[j] = 0;
 #endif
+  return 0;
 }
 
-void md_calc_pair_force_x(md_simulation_t_x *sim, md_pair_force_t_x pf) {
+int md_calc_pair_force_x(md_simulation_t_x *sim, md_pair_force_t_x pf) {
 #ifdef MD_USE_OPENCL_X
   cl_context context;
   cl_command_queue queue;
   cl_device_id device;
   int plat;
   cl_int status;
-  md_get_command_queue_x(&plat, NULL, &context, &device, &queue);
-  md_simulation_to_context_x(sim, context);
+  status = md_get_command_queue_x(&plat, NULL, &context, &device, &queue);
+  if (status != 0)
+    return status;
+  status = md_simulation_to_context_x(sim, context);
+  if (status != 0)
+    return status;
   md_inter_params_t_x params;
   nd_rect_t_x rect2;
   int i;
@@ -374,7 +497,9 @@ void md_calc_pair_force_x(md_simulation_t_x *sim, md_pair_force_t_x pf) {
   char kname[64];
   md_get_pair_force_info_x(pf, "md_fill_pair_force_", "_kx", kname, &params);
   if (sim->cpf_kernel != NULL && strcmp(sim->kname, kname)) {
-    clReleaseKernel(sim->cpf_kernel);
+    status = clReleaseKernel(sim->cpf_kernel);
+    if (status != 0)
+      return status;
     sim->cpf_kernel = NULL;
   }
   cl_kernel kernel = NULL;
@@ -382,43 +507,71 @@ void md_calc_pair_force_x(md_simulation_t_x *sim, md_pair_force_t_x pf) {
     kernel = sim->cpf_kernel;
   else {
     kernel = clCreateKernel(md_programs_x[plat], kname, &status);
-    clSetKernelArg(kernel, 0, sizeof(cl_mem), &sim->particles_mem);
-    clSetKernelArg(kernel, 2, sizeof(cl_mem), &sim->pair_ex_mem);
-    clSetKernelArg(kernel, 3, sizeof(int), &sim->pcount_ex);
-    clSetKernelArg(kernel, 4, sizeof(int), &sim->N);
+    if (status != 0)
+      return status;
+    status = clSetKernelArg(kernel, 0, sizeof(cl_mem), &sim->particles_mem);
+    status |= clSetKernelArg(kernel, 2, sizeof(cl_mem), &sim->pair_ex_mem);
+    status |= clSetKernelArg(kernel, 3, sizeof(int), &sim->pcount_ex);
+    status |= clSetKernelArg(kernel, 4, sizeof(int), &sim->N);
+    if (status != 0)
+      return status;
     sim->cpf_kernel = kernel;
     strcpy(sim->kname, kname);
   }
-  clSetKernelArg(kernel, 5, sizeof(md_inter_params_t_x), &params);
-  clSetKernelArg(kernel, 6, sizeof(nd_rect_t_x), &rect2);
+  status = clSetKernelArg(kernel, 5, sizeof(md_inter_params_t_x), &params);
+  status |= clSetKernelArg(kernel, 6, sizeof(nd_rect_t_x), &rect2);
+  if (status != 0)
+    return status;
   cl_mem forces = NULL;
   if (sim->forces != NULL)
     forces = sim->forces;
   else {
-    forces = clCreateBuffer(context, CL_MEM_READ_WRITE, sizeof(md_num_t_x)*sim->N*sim->N*MD_DIMENSION_X, NULL, NULL);
+    forces = clCreateBuffer(context, CL_MEM_READ_WRITE, sizeof(md_num_t_x)*sim->N*sim->N*MD_DIMENSION_X, NULL, &status);
+    if (status != 0)
+      return status;
     sim->forces = forces;
   }
-  clSetKernelArg(kernel, 1, sizeof(cl_mem), &forces);
+  status = clSetKernelArg(kernel, 1, sizeof(cl_mem), &forces);
+  if (status != 0)
+    return status;
   int size[1];
   size[0] = sim->pcount_ex;
   size_t local[1], global[1];
-  md_get_work_size_x(kernel, device, 1, size, global, local);
-  clEnqueueNDRangeKernel(queue, kernel, 1, NULL, global, local, 0, NULL, NULL);
-  md_update_queue_x(queue);
+  status = md_get_work_size_x(kernel, device, 1, size, global, local);
+  if (status != 0)
+    return status;
+  status = clEnqueueNDRangeKernel(queue, kernel, 1, NULL, global, local, 0, NULL, NULL);
+  if (status != 0)
+    return status;
+  status = md_update_queue_x(queue);
+  if (status != 0)
+    return status;
   cl_kernel kernel2 = NULL;
   if (sim->cpf_kernel2 != NULL)
     kernel2 = sim->cpf_kernel2;
   else {
     kernel2 = clCreateKernel(md_programs_x[plat], "md_update_pair_force_kx", &status);
-    clSetKernelArg(kernel2, 0, sizeof(cl_mem), &sim->particles_mem);
-    clSetKernelArg(kernel2, 2, sizeof(int), &sim->N);
+    if (status != 0)
+      return status;
+    status = clSetKernelArg(kernel2, 0, sizeof(cl_mem), &sim->particles_mem);
+    status |= clSetKernelArg(kernel2, 2, sizeof(int), &sim->N);
+    if (status != 0)
+      return status;
     sim->cpf_kernel2 = kernel2;
   }
-  clSetKernelArg(kernel2, 1, sizeof(cl_mem), &forces);
+  status = clSetKernelArg(kernel2, 1, sizeof(cl_mem), &forces);
+  if (status != 0)
+    return status;
   size[0] = sim->N;
-  md_get_work_size_x(kernel2, device, 1, size, global, local);
-  clEnqueueNDRangeKernel(queue, kernel2, 1, NULL, global, local, 0, NULL, NULL);
-  md_update_queue_x(queue);
+  status = md_get_work_size_x(kernel2, device, 1, size, global, local);
+  if (status != 0)
+    return status;
+  status = clEnqueueNDRangeKernel(queue, kernel2, 1, NULL, global, local, 0, NULL, NULL);
+  if (status != 0)
+    return status;
+  status = md_update_queue_x(queue);
+  if (status != 0)
+    return status;
   sim->queue = queue;
   //cl_event events[1];
   //events[0] = md_simulation_sync_queue_x(sim, queue, &status);
@@ -440,6 +593,7 @@ void md_calc_pair_force_x(md_simulation_t_x *sim, md_pair_force_t_x pf) {
         pf(sim->particles[i].x, sim->particles[j].x, sim->particles[i].f, L, sim->particles[i].m);
     }
 #endif
+  return 0;
 }
 
 void md_calc_nhc_force_x(md_simulation_t_x *sim, int f0, int f2, int i, md_num_t_x *res) {
@@ -458,35 +612,51 @@ void md_calc_nhc_force_x(md_simulation_t_x *sim, int f0, int f2, int i, md_num_t
     res[j] = (sim->nhcs[i].Q[j-1]*sim->nhcs[i].vtheta[j-1]*sim->nhcs[i].vtheta[j-1]-MD_kB_X*sim->T)/sim->nhcs[i].Q[j];
 }
 
-void md_update_nhc_VV3_1_x(md_simulation_t_x *sim, md_num_t_x h) {
+int md_update_nhc_VV3_1_x(md_simulation_t_x *sim, md_num_t_x h) {
 #ifdef MD_USE_OPENCL_X
   cl_context context;
   cl_command_queue queue;
   cl_device_id device;
   int plat;
   cl_int status;
-  md_get_command_queue_x(&plat, NULL, &context, &device, &queue);
-  md_simulation_to_context_x(sim, context);
+  status = md_get_command_queue_x(&plat, NULL, &context, &device, &queue);
+  if (status != 0)
+    return status;
+  status = md_simulation_to_context_x(sim, context);
+  if (status != 0)
+    return status;
   cl_kernel kernel = NULL;
   if (sim->uVV1_kernel != NULL)
     kernel = sim->uVV1_kernel;
   else {
     kernel = clCreateKernel(md_programs_x[plat], "md_update_nhc_VV3_1_kx", &status);
-    clSetKernelArg(kernel, 0, sizeof(cl_mem), &sim->particles_mem);
-    clSetKernelArg(kernel, 1, sizeof(cl_mem), &sim->nhcs_mem);
-    clSetKernelArg(kernel, 2, sizeof(cl_mem), &sim->f0s_mem);
-    clSetKernelArg(kernel, 4, sizeof(int), &sim->N);
-    clSetKernelArg(kernel, 5, sizeof(int), &sim->Nf);
+    if (status != 0)
+      return status;
+    status = clSetKernelArg(kernel, 0, sizeof(cl_mem), &sim->particles_mem);
+    status |= clSetKernelArg(kernel, 1, sizeof(cl_mem), &sim->nhcs_mem);
+    status |= clSetKernelArg(kernel, 2, sizeof(cl_mem), &sim->f0s_mem);
+    status |= clSetKernelArg(kernel, 4, sizeof(int), &sim->N);
+    status |= clSetKernelArg(kernel, 5, sizeof(int), &sim->Nf);
+    if (status != 0)
+      return status;
     sim->uVV1_kernel = kernel;
   }
-  clSetKernelArg(kernel, 3, sizeof(md_num_t_x), &h);
-  clSetKernelArg(kernel, 6, sizeof(md_num_t_x), &sim->T);
+  status = clSetKernelArg(kernel, 3, sizeof(md_num_t_x), &h);
+  status |= clSetKernelArg(kernel, 6, sizeof(md_num_t_x), &sim->T);
+  if (status != 0)
+    return status;
   int size[1];
   size[0] = sim->Nf;
   size_t local[1], global[1];
-  md_get_work_size_x(kernel, device, 1, size, global, local);
-  clEnqueueNDRangeKernel(queue, kernel, 1, NULL, global, local, 0, NULL, NULL);
-  md_update_queue_x(queue);
+  status = md_get_work_size_x(kernel, device, 1, size, global, local);
+  if (status != 0)
+    return status;
+  status = clEnqueueNDRangeKernel(queue, kernel, 1, NULL, global, local, 0, NULL, NULL);
+  if (status != 0)
+    return status;
+  status = md_update_queue_x(queue);
+  if (status != 0)
+    return status;
   sim->queue = queue;
   //cl_event events[1];
   //events[0] = md_simulation_sync_queue_x(sim, queue, &status);
@@ -499,6 +669,8 @@ void md_update_nhc_VV3_1_x(md_simulation_t_x *sim, md_num_t_x h) {
   int index, pi, pj;
   int f, f2;
   md_num_t_x *nhf = (md_num_t_x *)malloc(sizeof(md_num_t_x)*MD_NHC_LENGTH_X);
+  if (nhf == NULL)
+    return -1;
   for (i = 0; i < sim->Nf; ++i) {
     f = sim->nhcs[i].f;
     if (i == sim->Nf-1)
@@ -532,37 +704,54 @@ void md_update_nhc_VV3_1_x(md_simulation_t_x *sim, md_num_t_x h) {
   }
   free(nhf);
 #endif
+  return 0;
 }
 
-void md_update_nhc_VV3_2_x(md_simulation_t_x *sim, md_num_t_x h) {
+int md_update_nhc_VV3_2_x(md_simulation_t_x *sim, md_num_t_x h) {
 #ifdef MD_USE_OPENCL_X
   cl_context context;
   cl_command_queue queue;
   cl_device_id device;
   int plat;
   cl_int status;
-  md_get_command_queue_x(&plat, NULL, &context, &device, &queue);
-  md_simulation_to_context_x(sim, context);
+  status = md_get_command_queue_x(&plat, NULL, &context, &device, &queue);
+  if (status != 0)
+    return status;
+  status = md_simulation_to_context_x(sim, context);
+  if (status != 0)
+    return status;
   cl_kernel kernel = NULL;
   if (sim->uVV2_kernel != NULL)
     kernel = sim->uVV2_kernel;
   else {
     kernel = clCreateKernel(md_programs_x[plat], "md_update_nhc_VV3_2_kx", &status);
-    clSetKernelArg(kernel, 0, sizeof(cl_mem), &sim->particles_mem);
-    clSetKernelArg(kernel, 1, sizeof(cl_mem), &sim->nhcs_mem);
-    clSetKernelArg(kernel, 2, sizeof(cl_mem), &sim->f0s_mem);
-    clSetKernelArg(kernel, 4, sizeof(int), &sim->N);
-    clSetKernelArg(kernel, 5, sizeof(int), &sim->Nf);
+    if (status != 0)
+      return status;
+    status = clSetKernelArg(kernel, 0, sizeof(cl_mem), &sim->particles_mem);
+    status |= clSetKernelArg(kernel, 1, sizeof(cl_mem), &sim->nhcs_mem);
+    status |= clSetKernelArg(kernel, 2, sizeof(cl_mem), &sim->f0s_mem);
+    status |= clSetKernelArg(kernel, 4, sizeof(int), &sim->N);
+    status |= clSetKernelArg(kernel, 5, sizeof(int), &sim->Nf);
+    if (status != 0)
+      return status;
     sim->uVV2_kernel = kernel;
   }
-  clSetKernelArg(kernel, 3, sizeof(md_num_t_x), &h);
-  clSetKernelArg(kernel, 6, sizeof(md_num_t_x), &sim->T);
+  status = clSetKernelArg(kernel, 3, sizeof(md_num_t_x), &h);
+  status |= clSetKernelArg(kernel, 6, sizeof(md_num_t_x), &sim->T);
+  if (status != 0)
+    return status;
   int size[1];
   size[0] = sim->Nf;
   size_t local[1], global[1];
-  md_get_work_size_x(kernel, device, 1, size, global, local);
-  clEnqueueNDRangeKernel(queue, kernel, 1, NULL, global, local, 0, NULL, NULL);
-  md_update_queue_x(queue);
+  status = md_get_work_size_x(kernel, device, 1, size, global, local);
+  if (status != 0)
+    return status;
+  status = clEnqueueNDRangeKernel(queue, kernel, 1, NULL, global, local, 0, NULL, NULL);
+  if (status != 0)
+    return status;
+  status = md_update_queue_x(queue);
+  if (status != 0)
+    return status;
   sim->queue = queue;
   //cl_event events[1];
   //events[0] = md_simulation_sync_queue_x(sim, queue, &status);
@@ -575,6 +764,8 @@ void md_update_nhc_VV3_2_x(md_simulation_t_x *sim, md_num_t_x h) {
   int index, pi, pj;
   int f, f2;
   md_num_t_x *nhf = (md_num_t_x *)malloc(sizeof(md_num_t_x)*MD_NHC_LENGTH_X);
+  if (nhf == NULL)
+    return -1;
   for (i = 0; i < sim->Nf; ++i) {
     f = sim->nhcs[i].f;
     if (i == sim->Nf-1)
@@ -597,9 +788,10 @@ void md_update_nhc_VV3_2_x(md_simulation_t_x *sim, md_num_t_x h) {
   }
   free(nhf);
 #endif
+  return 0;
 }
 
-void md_periodic_boundary_x(md_simulation_t_x *sim) {
+int md_periodic_boundary_x(md_simulation_t_x *sim) {
   if (sim->box->type == MD_ND_RECT_BOX_X) {
     nd_rect_t_x *rect = (nd_rect_t_x *)sim->box->box;
 #ifdef MD_USE_OPENCL_X
@@ -608,24 +800,40 @@ void md_periodic_boundary_x(md_simulation_t_x *sim) {
     cl_device_id device;
     int plat;
     cl_int status;
-    md_get_command_queue_x(&plat, NULL, &context, &device, &queue);
-    md_simulation_to_context_x(sim, context);
+    status = md_get_command_queue_x(&plat, NULL, &context, &device, &queue);
+    if (status != 0)
+      return status;
+    status = md_simulation_to_context_x(sim, context);
+    if (status != 0)
+      return status;
     cl_kernel kernel = NULL;
     if (sim->pb_kernel != NULL)
       kernel = sim->pb_kernel;
     else {
       kernel = clCreateKernel(md_programs_x[plat], "md_rect_periodic_boundary_kx", &status);
-      clSetKernelArg(kernel, 0, sizeof(cl_mem), &sim->particles_mem);
-      clSetKernelArg(kernel, 1, sizeof(int), &sim->N);
+      if (status != 0)
+        return status;
+      status = clSetKernelArg(kernel, 0, sizeof(cl_mem), &sim->particles_mem);
+      status |= clSetKernelArg(kernel, 1, sizeof(int), &sim->N);
+      if (status != 0)
+        return status;
       sim->pb_kernel = kernel;
     }
-    clSetKernelArg(kernel, 2, sizeof(nd_rect_t_x), rect);
+    status = clSetKernelArg(kernel, 2, sizeof(nd_rect_t_x), rect);
+    if (status != 0)
+      return status;
     int size[1];
     size[0] = MD_DIMENSION_X*sim->N;
     size_t local[1], global[1];
-    md_get_work_size_x(kernel, device, 1, size, global, local);
-    clEnqueueNDRangeKernel(queue, kernel, 1, NULL, global, local, 0, NULL, NULL);
-    md_update_queue_x(queue);
+    status = md_get_work_size_x(kernel, device, 1, size, global, local);
+    if (status != 0)
+      return status;
+    status = clEnqueueNDRangeKernel(queue, kernel, 1, NULL, global, local, 0, NULL, NULL);
+    if (status != 0)
+      return status;
+    status = md_update_queue_x(queue);
+    if (status != 0)
+      return status;
     sim->queue = queue;
     //cl_event events[1];
     //events[0] = md_simulation_sync_queue_x(sim, queue, &status);
@@ -644,6 +852,7 @@ void md_periodic_boundary_x(md_simulation_t_x *sim) {
       }
 #endif
   }
+  return 0;
 }
 
 int md_periodic_image_count_x(md_num_t_x x, md_num_t_x L) {
@@ -655,8 +864,10 @@ int md_periodic_image_count_x(md_num_t_x x, md_num_t_x L) {
   return 0;
 }
 
-void md_periodic_boundary_count_x(md_simulation_t_x *sim, int *count) {
-  md_simulation_sync_host_x(sim, 0);
+int md_periodic_boundary_count_x(md_simulation_t_x *sim, int *count) {
+  sim = md_simulation_sync_host_x(sim, 0);
+  if (sim == NULL)
+    return -1;
   int l, i;
   md_num_t_x *L = NULL;
   if (sim->box->type == MD_ND_RECT_BOX_X) {
@@ -668,10 +879,13 @@ void md_periodic_boundary_count_x(md_simulation_t_x *sim, int *count) {
       count[MD_DIMENSION_X*l+i] = md_periodic_image_count_x(sim->particles[l].x[i], L[i]);
       sim->particles[l].x[i] += count[MD_DIMENSION_X*l+i]*L[i];
     }
+  return 0;
 }
 
-void md_periodic_boundary_recover_x(md_simulation_t_x *sim, int *count) {
-  md_simulation_sync_host_x(sim, 0);
+int md_periodic_boundary_recover_x(md_simulation_t_x *sim, int *count) {
+  sim = md_simulation_sync_host_x(sim, 0);
+  if (sim == NULL)
+    return -1;
   int l, i;
   md_num_t_x *L = NULL;
   if (sim->box->type == MD_ND_RECT_BOX_X) {
@@ -681,4 +895,18 @@ void md_periodic_boundary_recover_x(md_simulation_t_x *sim, int *count) {
   for (l = 0; l < sim->N; ++l)
     for (i = 0; i < MD_DIMENSION_X; ++i)
       sim->particles[l].x[i] -= count[MD_DIMENSION_X*l+i]*L[i];
+  return 0;
+}
+
+int md_simulation_rescale_velocity_x(md_simulation_t_x *sim, md_num_t_x T) {
+  int i, j;
+  md_num_t_x sum = 0;
+  for (i = 0; i < sim->N; ++i)
+    for (j = 0; j < MD_DIMENSION_X; ++j)
+      sum += sim->particles[i].m*sim->particles[i].v[j]*sim->particles[i].v[j];
+  md_num_t_x lam = sqrt(sim->fc*MD_kB_X*T/sum);
+  for (i = 0; i < sim->N; ++i)
+    for (j = 0; j < MD_DIMENSION_X; ++j)
+      sim->particles[i].v[j] *= lam;
+  return 0;
 }
