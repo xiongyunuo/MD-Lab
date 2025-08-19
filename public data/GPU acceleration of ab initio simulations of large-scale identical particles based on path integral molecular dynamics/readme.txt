@@ -1,1 +1,3 @@
 The provided input files are for the sample named "Fast PIMD test" in the MD Lab repository for different particle numbers. MD steps are changed in the main.c file.
+
+noninteracting500.in is example input file for LAMMPS with 500 particles no interactions.
